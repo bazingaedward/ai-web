@@ -6,7 +6,7 @@ export default [
   {
     ignores: ['**/dist', '**/node_modules', '**/.wrangler', '**/bolt/build'],
   },
-  ...blitzPlugin.configs.recommended(),
+  // ...blitzPlugin.configs.recommended(),
   {
     rules: {
       '@blitz/catch-error-name': 'off',

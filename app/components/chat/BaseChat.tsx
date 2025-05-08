@@ -86,6 +86,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 'h-full flex flex-col': chatStarted,
               })}
             >
+              {/* Messages */}
               <ClientOnly>
                 {() => {
                   return chatStarted ? (

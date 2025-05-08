@@ -26,9 +26,6 @@ export function streamText(messages: Messages, env: Env, options?: StreamingOpti
     model: getDeepSeekModel(),
     system: getSystemPrompt(),
     maxTokens: MAX_TOKENS,
-    // headers: {
-    //   'anthropic-beta': 'max-tokens-3-5-sonnet-2024-07-15',
-    // },
     messages,
     ...options,
   });

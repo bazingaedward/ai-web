@@ -30,6 +30,7 @@ const messageParser = new StreamingMessageParser({
     onActionClose: (data) => {
       logger.trace('onActionClose', data.action);
 
+      console.log(data, 112);
       if (data.action.type === 'shell') {
         workbenchStore.addAction(data);
       }

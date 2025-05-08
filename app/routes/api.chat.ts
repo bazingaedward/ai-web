@@ -17,6 +17,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     const options: StreamingOptions = {
       toolChoice: 'none',
       onFinish: async ({ text: content, finishReason }) => {
+        // 这里的content就是最终的内容
         if (finishReason !== 'length') {
           return stream.close();
         }

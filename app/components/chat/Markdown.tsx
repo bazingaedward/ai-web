@@ -28,7 +28,6 @@ export const Markdown = memo(({ children, html = false, limitedMarkdown = false 
           if (!messageId) {
             logger.error(`Invalid message id ${messageId}`);
           }
-
           return <Artifact messageId={messageId} />;
         }
 

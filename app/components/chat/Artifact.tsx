@@ -37,8 +37,6 @@ export const Artifact = memo(({ messageId }: ArtifactProps) => {
     }),
   );
 
-  console.log(actions, `122`);
-
   const toggleActions = () => {
     userToggledActions.current = true;
     setShowActions(!showActions);

@@ -7,6 +7,9 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig((config) => {
   return {
+    define: {
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    },
     build: {
       target: 'esnext',
     },
@@ -16,6 +19,8 @@ export default defineConfig((config) => {
       }),
       config.mode !== 'test' && remixCloudflareDevProxy(),
       remixVitePlugin({
+        // serverPlatform: "cloudflare",
+        // serverModuleFormat: "esm",
         future: {
           v3_fetcherPersist: true,
           v3_relativeSplatPath: true,

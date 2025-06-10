@@ -1,54 +1,66 @@
-[![Bolt.new: AI-Powered Full-Stack Web Development in the Browser](./public/social_preview_index.jpg)](https://bolt.new)
+# Beaver.AI: AI-Powered design to code platform in the Browser
 
-# Bolt.new: AI-Powered Full-Stack Web Development in the Browser
+## Requirements
+- Node.js (v20 or higher)
+- Remix (v2.0.0 or higher)
+- Cloudflare Workers (v4.0.0 or higher)
+- pnpm (v8.0.0 or higher)
+  
+## Installation
+To get started with Beaver.AI, follow these steps:
+1. Clone the repository:
+   ```bash
+   git clone xxx
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd beaver-ai
+   ```
+3. Install the dependencies using pnpm:
+   ```bash
+   pnpm install
+   ```
+4. Set up the environment variables:    
+   Create a `.env` file in the root directory and add the following variables:
+   ```env
+   OPENAI_API_KEY=your_openai_api_key
+   CLOUDINARY_URL=your_cloudinary_url
+   ```
+5. Start the development server:
+   ```bash
+   pnpm run dev
+   ```
+6. Open your browser and navigate to `http://localhost:5173` to see the application in action.
 
-Bolt.new is an AI-powered web development agent that allows you to prompt, run, edit, and deploy full-stack applications directly from your browser—no local setup required. If you're here to build your own AI-powered web dev agent using the Bolt open source codebase, [click here to get started!](./CONTRIBUTING.md)
+## Features
+- AI-powered design to code conversion
+- Seamless integration with Cloudflare Workers
+- Support for Remix framework
+- Easy deployment with pnpm
 
-## What Makes Bolt.new Different
+### cloudflare local enviroment variables
 
-Claude, v0, etc are incredible- but you can't install packages, run backends or edit code. That’s where Bolt.new stands out:
+To run the project locally, you need to set up the following environment variables in a `.env` file:
 
-- **Full-Stack in the Browser**: Bolt.new integrates cutting-edge AI models with an in-browser development environment powered by **StackBlitz’s WebContainers**. This allows you to:
-  - Install and run npm tools and libraries (like Vite, Next.js, and more)
-  - Run Node.js servers
-  - Interact with third-party APIs
-  - Deploy to production from chat
-  - Share your work via a URL
+```
+// wrangler.toml
+[vars]
+secret_key = "your_secret_key
+```
 
-- **AI with Environment Control**: Unlike traditional dev environments where the AI can only assist in code generation, Bolt.new gives AI models **complete control** over the entire  environment including the filesystem, node server, package manager, terminal, and browser console. This empowers AI agents to handle the entire app lifecycle—from creation to deployment.
 
-Whether you’re an experienced developer, a PM or designer, Bolt.new allows you to build production-grade full-stack applications with ease.
+## Deployment
+To deploy the project, you can use the following command:
 
-For developers interested in building their own AI-powered development tools with WebContainers, check out the open-source Bolt codebase in this repo!
+```
+pnpm run deploy
+```
 
-## Tips and Tricks
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-Here are some tips to get the most out of Bolt.new:
+## Contributing
+We welcome contributions to Beaver.AI! If you have suggestions or improvements, please open an issue or submit a pull request.
 
-- **Be specific about your stack**: If you want to use specific frameworks or libraries (like Astro, Tailwind, ShadCN, or any other popular JavaScript framework), mention them in your initial prompt to ensure Bolt scaffolds the project accordingly.
-
-- **Use the enhance prompt icon**: Before sending your prompt, try clicking the 'enhance' icon to have the AI model help you refine your prompt, then edit the results before submitting.
-
-- **Scaffold the basics first, then add features**: Make sure the basic structure of your application is in place before diving into more advanced functionality. This helps Bolt understand the foundation of your project and ensure everything is wired up right before building out more advanced functionality.
-
-- **Batch simple instructions**: Save time by combining simple instructions into one message. For example, you can ask Bolt to change the color scheme, add mobile responsiveness, and restart the dev server, all in one go saving you time and reducing API credit consumption significantly.
-
-## FAQs
-
-**Where do I sign up for a paid plan?**  
-Bolt.new is free to get started. If you need more AI tokens or want private projects, you can purchase a paid subscription in your [Bolt.new](https://bolt.new) settings, in the lower-left hand corner of the application. 
-
-**What happens if I hit the free usage limit?**  
-Once your free daily token limit is reached, AI interactions are paused until the next day or until you upgrade your plan.
-
-**Is Bolt in beta?**  
-Yes, Bolt.new is in beta, and we are actively improving it based on feedback.
-
-**How can I report Bolt.new issues?**  
-Check out the [Issues section](https://github.com/stackblitz/bolt.new/issues) to report an issue or request a new feature. Please use the search feature to check if someone else has already submitted the same issue/request.
-
-**What frameworks/libraries currently work on Bolt?**  
-Bolt.new supports most popular JavaScript frameworks and libraries. If it runs on StackBlitz, it will run on Bolt.new as well.
-
-**How can I add make sure my framework/project works well in bolt?**  
-We are excited to work with the JavaScript ecosystem to improve functionality in Bolt. Reach out to us via [hello@stackblitz.com](mailto:hello@stackblitz.com) to discuss how we can partner!
+## Contact
+For any questions or inquiries, please contact us at bazingaedward@gmail.com

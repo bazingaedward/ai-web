@@ -38,6 +38,15 @@ export const links: LinksFunction = () => [
   },
 ];
 
+export function meta() {
+  return [
+    {
+      name: "build-time",
+      content: __BUILD_TIME__
+    }
+  ];
+}
+
 const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
 

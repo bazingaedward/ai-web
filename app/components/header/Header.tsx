@@ -3,10 +3,18 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
-import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { useLoaderData } from '@remix-run/react';
+
+type UserInfo = {
+  displayName?: string;
+  _json?: {
+    picture?: string;
+  };
+};
 
 export function Header() {
   const chat = useStore(chatStore);
+  const userInfo = useLoaderData() as UserInfo;
 
   return (
     <header
@@ -18,15 +26,33 @@ export function Header() {
         },
       )}
     >
-      <div className="flex items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
+      <div className="flex items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer justify-between w-full">
+        <div className='inline-flex items-center gap-2'>
         <div className="i-ph:sidebar-simple-duotone text-xl" />
-        <a href="/" className="text-2xl font-semibold text-accent flex items-center">
-          <span className="i-bolt:logo-text?mask w-[46px] inline-block" />
+
+         <a href="/" className="text-2xl font-semibold text-accent flex items-center">
+          Beaver.AI
         </a>
+        </div>
+      {
+        userInfo && (
+          <div className='flex items-center gap-2 ml-auto mr-4'>
+            {userInfo._json?.picture && (
+              <img
+                loading="lazy"
+                crossOrigin="anonymous"
+                src={userInfo._json.picture}
+                alt="User avatar"
+                className="w-8 h-8 rounded-full "
+              />
+            )}
+            <span className='c-white'>{userInfo.displayName || ''}</span>
+          </div>
+        )
+      }
       </div>
-      <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
-        <ClientOnly>{() => <ChatDescription />}</ClientOnly>
-      </span>
+
+
       {chat.started && (
         <ClientOnly>
           {() => (

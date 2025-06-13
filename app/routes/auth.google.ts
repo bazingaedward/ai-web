@@ -1,7 +1,6 @@
 import { getAuthenticator } from '~/services/auth.server';
 
 export const loader = async ({ request, context }) => {
-  console.log(context, 'context in auth.google.ts');
   const {authenticator} = getAuthenticator(context.cloudflare.env)
   return await authenticator.authenticate('google', request, {
     successRedirect: '/', // 登录成功后重定向的路径

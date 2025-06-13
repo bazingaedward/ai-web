@@ -5,10 +5,4 @@ compatibility_date = "2024-09-23"
 pages_build_output_dir = "./build/client"
 
 
-[[kv_namespaces]]
-binding = "USER_LOGIN"
-id = "7138352381ae4e78ac7fab39213a172a"
 
-[[kv_namespaces]]
-binding = "KV_STORE"
-id = "ae336fab0e664753a694538bd82f6302"

@@ -81,6 +81,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@blitz/eslint-plugin": "0.1.0",
     "@cloudflare/workers-types": "^4.20240620.0",
     "@remix-run/dev": "^2.16.8",

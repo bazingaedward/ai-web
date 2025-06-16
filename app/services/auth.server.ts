@@ -5,19 +5,21 @@ import type { User } from "~/models/user.server";
 
 import { isDev } from "~/utils/env";
 
-export function getAuthenticator(env: Record<string, string>) {
-	const sessionStorage = createCookieSessionStorage({
-		cookie: {
-			name: "__session",
-			httpOnly: true,
-			maxAge: 60,
-			path: "/",
-			sameSite: "lax",
-			secrets: [env.SESSION_SECRET],
-			secure: true,
-		},
-	});
+const SESSION_SECRET = "your-session-secret-here"; // Replace with your actual session secret
 
+export const sessionStorage = createCookieSessionStorage({
+	cookie: {
+		name: "__session",
+		httpOnly: true,
+		maxAge: 60,
+		path: "/",
+		sameSite: "lax",
+		secrets: [SESSION_SECRET],
+		secure: true,
+	},
+});
+
+export function getAuthenticator(env: Record<string, string>) {
 	const authenticator = new Authenticator<User>(sessionStorage);
 
 	authenticator.use(
@@ -38,6 +40,9 @@ export function getAuthenticator(env: Record<string, string>) {
 					email: profile.emails?.[0]?.value || "",
 					avatar: profile.photos?.[0]?.value || "",
 				};
+
+				console.log("User Info:", userInfo);
+
 				await env.USER_LOGIN.put("user", JSON.stringify(userInfo));
 				return userInfo;
 			},

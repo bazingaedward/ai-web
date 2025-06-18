@@ -3,7 +3,8 @@ import { ClientOnly } from "remix-utils/client-only";
 import { chatStore } from "~/lib/stores/chat";
 import { classNames } from "~/utils/classNames";
 import { HeaderActionButtons } from "./HeaderActionButtons.client";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
+import React, { useState } from "react";
 
 export type UserInfo = {
 	id: string;
@@ -15,6 +16,11 @@ export type UserInfo = {
 export function Header() {
 	const chat = useStore(chatStore);
 	const userInfo = useLoaderData() as UserInfo;
+	const [showSignIn, setShowSignIn] = useState(false);
+	const navigate = useNavigate();
+	const onGoogleLogin = () => {
+		navigate("/auth/google");
+	};
 
 	return (
 		<header
@@ -37,7 +43,7 @@ export function Header() {
 						Beaver.AI
 					</a>
 				</div>
-				{userInfo && (
+				{userInfo ? (
 					<div className="flex items-center gap-2 ml-auto mr-4">
 						<img
 							loading="lazy"
@@ -47,6 +53,34 @@ export function Header() {
 							className="w-8 h-8 rounded-full "
 						/>
 						<span className="c-white">{userInfo.name || ""}</span>
+					</div>
+				) : (
+					<div>
+						<button
+							className="ml-auto bg-transparent  mr-4 px-4 py-2 border border-white  text-white rounded hover:bg-accent-dark transition"
+							onClick={() => setShowSignIn(true)}
+						>
+							Sign In
+						</button>
+						{showSignIn && (
+							<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+								<div className="bg-white rounded-lg shadow-lg p-8 min-w-[300px] relative">
+									<button
+										className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+										onClick={() => setShowSignIn(false)}
+										aria-label="Close"
+									>
+										&times;
+									</button>
+
+									<img
+										src="/google_signin.png"
+										alt="signin"
+										onClick={onGoogleLogin}
+									/>
+								</div>
+							</div>
+						)}
 					</div>
 				)}
 			</div>

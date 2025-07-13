@@ -1,40 +1,17 @@
-import { json, type MetaFunction } from "@remix-run/cloudflare";
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { ClientOnly } from "remix-utils/client-only";
 import { BaseChat } from "~/components/chat/BaseChat";
 import { Chat } from "~/components/chat/Chat.client";
 import { Header } from "~/components/header/Header";
-import { getAuthenticator } from "~/services/auth.server";
+import { getOptionalAuth } from "~/lib/auth.server";
 
-export const loader = async ({ context, request }) => {
-	const { authenticator } = getAuthenticator(context.cloudflare.env);
-	const user = await authenticator.isAuthenticated(request);
+export async function loader(args: LoaderFunctionArgs) {
+	const { session } = await getOptionalAuth(args);
 
-	// const user = {
-	// 	provider: "google",
-	// 	id: "103738252342311937057",
-	// 	displayName: "邱凯翔",
-	// 	name: { familyName: "邱", givenName: "凯翔" },
-	// 	emails: [{ value: "bazingaedward@gmail.com" }],
-	// 	photos: [
-	// 		{
-	// 			value:
-	// 				"https://lh3.googleusercontent.com/a/ACg8ocLUgCdjsI2cF0HbR-Gamqc2XVk2059C2FqzRI8bm9oYrkhV5FLa=s96-c",
-	// 		},
-	// 	],
-	// 	_json: {
-	// 		sub: "103738252342311937057",
-	// 		name: "邱凯翔",
-	// 		given_name: "凯翔",
-	// 		family_name: "邱",
-	// 		picture:
-	// 			"https://lh3.googleusercontent.com/a/ACg8ocLUgCdjsI2cF0HbR-Gamqc2XVk2059C2FqzRI8bm9oYrkhV5FLa=s96-c",
-	// 		email: "bazingaedward@gmail.com",
-	// 		email_verified: true,
-	// 	},
-	// };
-
-	return json(user);
-};
+	return json({
+		user: session?.user || null,
+	});
+}
 
 export default function Index() {
 	return (

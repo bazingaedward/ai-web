@@ -4,23 +4,42 @@ import { chatStore } from "~/lib/stores/chat";
 import { classNames } from "~/utils/classNames";
 import { HeaderActionButtons } from "./HeaderActionButtons.client";
 import { useLoaderData, useNavigate } from "@remix-run/react";
-import React, { useState } from "react";
 
 export type UserInfo = {
 	id: string;
 	name: string;
 	email: string;
-	avatar: string;
+};
+
+type LoaderData = {
+	user: {
+		id: string;
+		email: string;
+		user_metadata: {
+			name?: string;
+			avatar_url?: string;
+			full_name?: string;
+			picture?: string;
+		};
+	} | null;
 };
 
 export function Header() {
 	const chat = useStore(chatStore);
-	const userInfo = useLoaderData() as UserInfo;
-	const [showSignIn, setShowSignIn] = useState(false);
 	const navigate = useNavigate();
-	const onGoogleLogin = () => {
-		navigate("/auth/google");
-	};
+	const { user } = useLoaderData<LoaderData>();
+
+	// 从 Supabase user 对象构造 userInfo
+	const userInfo: UserInfo | null = user
+		? {
+				id: user.id,
+				name:
+					user.user_metadata?.name ||
+					user.user_metadata?.full_name ||
+					user.email.split("@")[0],
+				email: user.email,
+			}
+		: null;
 
 	return (
 		<header
@@ -44,44 +63,27 @@ export function Header() {
 					</a>
 				</div>
 				{userInfo ? (
-					<div className="flex items-center gap-2 ml-auto mr-4">
-						<img
-							loading="lazy"
-							crossOrigin="anonymous"
-							src={userInfo.avatar}
-							alt="User avatar"
-							className="w-8 h-8 rounded-full "
-						/>
-						<span className="c-white">{userInfo.name || ""}</span>
+					<div className="flex items-center gap-3 ml-auto mr-4">
+						<span className="text-white text-sm font-medium">
+							{userInfo.name}
+						</span>
+						<button
+							type="button"
+							onClick={() => navigate("/logout")}
+							className="px-3 py-1.5 text-xs bg-gray-800 text-white rounded-md hover:bg-gray-700 border border-gray-600 transition-colors font-medium"
+							title="Logout"
+						>
+							Logout
+						</button>
 					</div>
 				) : (
-					<div>
-						<button
-							className="ml-auto bg-transparent  mr-4 px-4 py-2 border border-white  text-white rounded hover:bg-accent-dark transition"
-							onClick={() => setShowSignIn(true)}
-						>
-							Sign In
-						</button>
-						{showSignIn && (
-							<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-								<div className="bg-white rounded-lg shadow-lg p-8 min-w-[300px] relative">
-									<button
-										className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-										onClick={() => setShowSignIn(false)}
-										aria-label="Close"
-									>
-										&times;
-									</button>
-
-									<img
-										src="/google_signin.png"
-										alt="signin"
-										onClick={onGoogleLogin}
-									/>
-								</div>
-							</div>
-						)}
-					</div>
+					<button
+						type="button"
+						onClick={() => navigate("/login")}
+						className="ml-auto mr-4 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 border border-gray-600 transition-colors font-medium"
+					>
+						Login
+					</button>
 				)}
 			</div>
 

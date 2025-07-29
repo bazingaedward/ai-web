@@ -90,12 +90,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		supabaseAnonKey,
 	);
 
+
 	if (action === "google") {
 		try {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "google",
 				options: {
-					redirectTo: `${new URL(request.url).origin}/login`,
+					redirectTo: `/login`,
 				},
 			});
 
@@ -125,7 +126,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "github",
 				options: {
-					redirectTo: `${new URL(request.url).origin}/login`,
+					redirectTo: `/login`,
 				},
 			});
 

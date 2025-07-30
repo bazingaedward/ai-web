@@ -46,7 +46,6 @@ export async function getOptionalAuth(args: LoaderFunctionArgs) {
 	const supabaseAnonKey = args.context.cloudflare.env.SUPABASE_ANON_KEY;
 
 	if (!supabaseUrl || !supabaseAnonKey) {
-		console.log("Missing Supabase credentials");
 		return { session: null, supabase: null, response };
 	}
 

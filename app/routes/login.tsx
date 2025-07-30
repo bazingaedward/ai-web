@@ -21,10 +21,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 	const url = new URL(request.url);
 	const code = url.searchParams.get("code"); // 统一的认证码 (OAuth + 邮件验证)
 
-	// 添加调试信息
-	console.log("登录回调 URL:", url.toString());
-	console.log("URL 参数:", Object.fromEntries(url.searchParams.entries()));
-
 	const response = new Response();
 	const supabaseUrl = context.cloudflare.env.SUPABASE_URL as string;
 	const supabaseAnonKey = context.cloudflare.env.SUPABASE_ANON_KEY as string;
@@ -90,13 +86,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		supabaseAnonKey,
 	);
 
+	const redirectTo = `${new URL(request.url).origin}/login`;
 
 	if (action === "google") {
 		try {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "google",
 				options: {
-					redirectTo: `/login`,
+					redirectTo,
 				},
 			});
 
@@ -126,7 +123,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "github",
 				options: {
-					redirectTo: `/login`,
+					redirectTo,
 				},
 			});
 
@@ -200,7 +197,7 @@ export default function Auth() {
 			<div className="max-w-md w-full space-y-8">
 				<div className="text-center">
 					<h2 className="mt-6 text-3xl font-bold text-white">
-						Welcome to Beaver.AI
+						Welcome to Sharkbook
 					</h2>
 					<p className="mt-2 text-sm text-gray-400">
 						Sign in to your account or create a new one

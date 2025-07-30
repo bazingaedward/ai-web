@@ -47,7 +47,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 			}
 
 			if (data.session) {
-				console.log("会话创建成功, 用户:", data.user?.email);
 				const headers = new Headers(response.headers);
 				headers.set("Location", "/");
 				return new Response(null, { status: 302, headers });
@@ -92,8 +91,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		try {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "google",
+
 				options: {
 					redirectTo,
+					queryParams: {
+						access_type: "offline",
+						prompt: "consent",
+					},
 				},
 			});
 
@@ -124,6 +128,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
 				provider: "github",
 				options: {
 					redirectTo,
+					queryParams: {
+						access_type: "offline",
+						prompt: "consent",
+					},
 				},
 			});
 

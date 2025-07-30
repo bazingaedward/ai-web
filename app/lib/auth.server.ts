@@ -55,10 +55,13 @@ export async function getOptionalAuth(args: LoaderFunctionArgs) {
 		supabaseUrl,
 		supabaseAnonKey,
 	);
-
-	const {
-		data: { session },
-	} = await supabase.auth.getSession();
-
-	return { session, supabase, response };
+	try {
+		const {
+			data: { session },
+		} = await supabase.auth.getSession();
+		return { session, supabase, response };
+	} catch (error) {
+		console.error("Error fetching session:", error);
+		return { session: null, supabase, response };
+	}
 }

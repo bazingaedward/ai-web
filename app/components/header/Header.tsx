@@ -60,7 +60,7 @@ export function Header() {
 						href="/"
 						className="text-2xl font-semibold text-accent flex items-center"
 					>
-						Beaver.AI
+						Sharkbook
 					</a>
 				</div>
 				{userInfo ? (
@@ -68,7 +68,10 @@ export function Header() {
 						<Avatar.Root className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white text-sm font-medium overflow-hidden">
 							<Avatar.Image
 								className="w-full h-full object-cover"
-								src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+								src={
+									user?.user_metadata?.avatar_url ||
+									user?.user_metadata?.picture
+								}
 								alt={userInfo.name}
 							/>
 							<Avatar.Fallback className="w-full h-full flex items-center justify-center bg-gray-600 text-white text-sm font-medium">

@@ -8,10 +8,7 @@ import {
 	ScrollRestoration,
 } from "@remix-run/react";
 import tailwindReset from "@unocss/reset/tailwind-compat.css?url";
-import { themeStore } from "./lib/stores/theme";
-import { stripIndents } from "./utils/stripIndent";
 import { createHead } from "remix-island";
-import { useEffect } from "react";
 
 import reactToastifyStyles from "react-toastify/dist/ReactToastify.css?url";
 import globalStyles from "./styles/index.scss?url";
@@ -53,37 +50,16 @@ export function meta() {
 	];
 }
 
-const inlineThemeCode = stripIndents`
-  setTutorialKitTheme();
-
-  function setTutorialKitTheme() {
-    let theme = localStorage.getItem('bolt_theme');
-
-    if (!theme) {
-      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }
-`;
-
 export const Head = createHead(() => (
 	<>
 		<meta charSet="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<Meta />
 		<Links />
-		<script dangerouslySetInnerHTML={{ __html: inlineThemeCode }} />
 	</>
 ));
 
 export function Layout({ children }: { children: React.ReactNode }) {
-	const theme = useStore(themeStore);
-
-	useEffect(() => {
-		document.querySelector("html")?.setAttribute("data-theme", theme);
-	}, [theme]);
-
 	return (
 		<>
 			{children}

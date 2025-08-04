@@ -86,13 +86,9 @@ export const ChatImpl = memo(
 	({ initialMessages, storeMessageHistory }: ChatProps) => {
 		useShortcuts();
 		const { user } = useLoaderData();
-
 		const textareaRef = useRef<HTMLTextAreaElement>(null);
-
 		const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
-
 		const { showChat } = useStore(chatStore);
-
 		const [animationScope, animate] = useAnimate();
 
 		const {
@@ -107,7 +103,6 @@ export const ChatImpl = memo(
 			api: "/api/chat",
 			onError: (error) => {
 				logger.error("Request failed\n\n", error);
-				toast.error("There was an error processing your request");
 			},
 			onFinish: () => {
 				logger.debug("Finished streaming");

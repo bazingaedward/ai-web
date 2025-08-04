@@ -1,4 +1,4 @@
-# Beaver.AI: AI-Powered design to code platform in the Browser
+# Sharkbook: AI-Powered design to code platform in the Browser
 
 ## Requirements
 - Node.js (v20 or higher)
@@ -7,7 +7,7 @@
 - pnpm (v8.0.0 or higher)
   
 ## Installation
-To get started with Beaver.AI, follow these steps:
+To get started with Sharkbook, follow these steps:
 1. Clone the repository:
    ```bash
    git clone xxx
@@ -37,6 +37,7 @@ To get started with Beaver.AI, follow these steps:
 - Seamless integration with Cloudflare Workers
 - Support for Remix framework
 - Easy deployment with pnpm
+- Unocss
 
 ### cloudflare local enviroment variables
 
@@ -60,7 +61,7 @@ pnpm run deploy
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
-We welcome contributions to Beaver.AI! If you have suggestions or improvements, please open an issue or submit a pull request.
+We welcome contributions to Sharkbook! If you have suggestions or improvements, please open an issue or submit a pull request.
 
 ## Contact
 For any questions or inquiries, please contact us at bazingaedward@gmail.com

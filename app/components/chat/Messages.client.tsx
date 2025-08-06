@@ -15,17 +15,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 	(props: MessagesProps, ref) => {
 		const { id, isStreaming = false, messages = [] } = props;
 
-		{
-			messages.map((message) => (
-				<div key={message.id}>
-					{message.role === "user" ? "User: " : "AI: "}
-					{message.parts.map((part, index) =>
-						part.type === "text" ? <span key={index}>{part.text}</span> : null,
-					)}
-				</div>
-			));
-		}
-
 		return (
 			<div id={id} ref={ref} className={props.className}>
 				{messages.map((message, index) => {

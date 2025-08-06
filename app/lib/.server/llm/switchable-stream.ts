@@ -44,10 +44,21 @@ export default class SwitchableStream extends TransformStream {
           break;
         }
 
+        // 处理特殊的 chunk 类型
+        if (value && typeof value === 'object' && 'type' in value) {
+          const chunkType = value.type;
+
+          // 跳过这些特殊的 chunk 类型
+          if (chunkType === 'stream-start' || chunkType === 'stream-end') {
+            console.log(`Skipping chunk type: ${chunkType}`);
+            continue;
+          }
+        }
+
         this._controller.enqueue(value);
       }
     } catch (error) {
-      console.log(error);
+      console.log('Stream error:', error);
       this._controller.error(error);
     }
   }

@@ -36,7 +36,7 @@ export default defineConfig((config) => {
 			config.mode === "production" && optimizeCssModules({ apply: "build" }),
 		],
 		server: {
-			port: 3000,
+			port: 3001,
 		},
 	};
 });

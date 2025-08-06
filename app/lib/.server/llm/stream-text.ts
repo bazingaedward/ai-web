@@ -1,46 +1,36 @@
-import { streamText as _streamText, convertToCoreMessages } from 'ai';
-import { getAPIKey } from '~/lib/.server/llm/api-key';
-import { getAnthropicModel, getDeepSeekModel } from '~/lib/.server/llm/model';
-import { MAX_TOKENS } from './constants';
-import { getSystemPrompt } from './prompts';
+import { streamText as _streamText, convertToCoreMessages } from "ai";
+import { getOpenAIModel } from "~/lib/.server/llm/model";
+import { MAX_TOKENS } from "./constants";
+import { getSystemPrompt } from "./prompts";
 
 interface ToolResult<Name extends string, Args, Result> {
-  toolCallId: string;
-  toolName: Name;
-  args: Args;
-  result: Result;
+	toolCallId: string;
+	toolName: Name;
+	args: Args;
+	result: Result;
 }
 
 interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-  toolInvocations?: ToolResult<string, unknown, unknown>[];
+	role: "user" | "assistant";
+	content: string;
+	toolInvocations?: ToolResult<string, unknown, unknown>[];
 }
 
 export type Messages = Message[];
 
-export type StreamingOptions = Omit<Parameters<typeof _streamText>[0], 'model'>;
+export type StreamingOptions = Omit<Parameters<typeof _streamText>[0], "model">;
 
-export function streamText(messages: Messages, env: Env, options?: StreamingOptions) {
-  return _streamText({
-    model: getDeepSeekModel(),
-    system: getSystemPrompt(),
-    maxTokens: MAX_TOKENS,
-    messages,
-    ...options,
-  });
+export function streamText(
+	messages: Messages,
+	env: Env,
+	options?: StreamingOptions,
+) {
+	const msgs = convertToCoreMessages(messages);
+	return _streamText({
+		model: getOpenAIModel(env),
+		system: getSystemPrompt(),
+		maxTokens: MAX_TOKENS,
+		messages: msgs,
+		...options,
+	});
 }
-
-// backup
-// export function streamText(messages: Messages, env: Env, options?: StreamingOptions) {
-//   return _streamText({
-//     model: getAnthropicModel(getAPIKey(env)),
-//     system: getSystemPrompt(),
-//     maxTokens: MAX_TOKENS,
-//     headers: {
-//       'anthropic-beta': 'max-tokens-3-5-sonnet-2024-07-15',
-//     },
-//     messages: convertToCoreMessages(messages),
-//     ...options,
-//   });
-// }

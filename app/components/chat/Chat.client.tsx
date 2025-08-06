@@ -1,44 +1,28 @@
 import { useStore } from "@nanostores/react";
-import type { Message } from "ai";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { useAnimate } from "framer-motion";
 import { memo, useEffect, useRef, useState } from "react";
-import { cssTransition, toast, ToastContainer } from "react-toastify";
-import {
-	useMessageParser,
-	usePromptEnhancer,
-	useShortcuts,
-	useSnapScroll,
-} from "~/lib/hooks";
-import { useChatHistory } from "~/lib/persistence";
+import { cssTransition, ToastContainer } from "react-toastify";
+import { useMessageParser, useShortcuts, useSnapScroll } from "~/lib/hooks";
 import { chatStore } from "~/lib/stores/chat";
 import { workbenchStore } from "~/lib/stores/workbench";
-import { fileModificationsToHTML } from "~/utils/diff";
 import { cubicEasingFn } from "~/utils/easings";
-import { createScopedLogger, renderLogger } from "~/utils/logger";
+import { renderLogger } from "~/utils/logger";
 import { BaseChat } from "./BaseChat";
 import { useLoaderData } from "@remix-run/react";
+import { convertToCoreMessages, DefaultChatTransport } from "ai";
 
 const toastAnimation = cssTransition({
 	enter: "animated fadeInRight",
 	exit: "animated fadeOutRight",
 });
 
-const logger = createScopedLogger("Chat");
-
 export function Chat() {
 	renderLogger.trace("Chat");
 
-	const { ready, initialMessages, storeMessageHistory } = useChatHistory();
-
 	return (
 		<>
-			{ready && (
-				<ChatImpl
-					initialMessages={initialMessages}
-					storeMessageHistory={storeMessageHistory}
-				/>
-			)}
+			<ChatImpl />
 			<ToastContainer
 				closeButton={({ closeToast }) => {
 					return (
@@ -74,206 +58,80 @@ export function Chat() {
 	);
 }
 
-interface ChatProps {
-	initialMessages: Message[];
-	storeMessageHistory: (messages: Message[]) => Promise<void>;
-}
-
 /**
  * Chat component that handles the chat functionality, including sending messages,
  */
-export const ChatImpl = memo(
-	({ initialMessages, storeMessageHistory }: ChatProps) => {
-		useShortcuts();
-		const { user } = useLoaderData();
-		const textareaRef = useRef<HTMLTextAreaElement>(null);
-		const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
-		const { showChat } = useStore(chatStore);
-		const [animationScope, animate] = useAnimate();
+export const ChatImpl = () => {
+	useShortcuts();
+	const { user } = useLoaderData();
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const [chatStarted, setChatStarted] = useState(false);
+	const [animationScope, animate] = useAnimate();
 
-		const {
-			messages,
-			isLoading,
-			input,
-			handleInputChange,
-			setInput,
-			stop,
-			append,
-		} = useChat({
+	// TODO: 定位解决messages结构参数不对问题
+	const { messages, stop, sendMessage } = useChat({
+		transport: new DefaultChatTransport({
 			api: "/api/chat",
-			onError: (error) => {
-				logger.error("Request failed\n\n", error);
-			},
-			onFinish: () => {
-				logger.debug("Finished streaming");
-			},
-			initialMessages,
-		});
+		}),
+	});
 
-		const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } =
-			usePromptEnhancer();
-		const { parsedMessages, parseMessages } = useMessageParser();
+	const { parsedMessages, parseMessages } = useMessageParser();
+	const [input, setInput] = useState("");
 
-		const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
+	const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
-		useEffect(() => {
-			chatStore.setKey("started", initialMessages.length > 0);
-		}, []);
+	const abort = () => {
+		stop();
+		chatStore.setKey("aborted", true);
+		workbenchStore.abortAllActions();
+	};
 
-		useEffect(() => {
-			parseMessages(messages, isLoading);
+	useEffect(() => {
+		const textarea = textareaRef.current;
 
-			if (messages.length > initialMessages.length) {
-				storeMessageHistory(messages).catch((error) =>
-					toast.error(error.message),
-				);
-			}
-		}, [messages, isLoading, parseMessages]);
+		if (textarea) {
+			textarea.style.height = "auto";
 
-		const scrollTextArea = () => {
-			const textarea = textareaRef.current;
+			const scrollHeight = textarea.scrollHeight;
 
-			if (textarea) {
-				textarea.scrollTop = textarea.scrollHeight;
-			}
-		};
+			textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`;
+			textarea.style.overflowY =
+				scrollHeight > TEXTAREA_MAX_HEIGHT ? "auto" : "hidden";
+		}
+	}, [textareaRef]);
 
-		const abort = () => {
-			stop();
-			chatStore.setKey("aborted", true);
-			workbenchStore.abortAllActions();
-		};
+	const [messageRef, scrollRef] = useSnapScroll();
 
-		useEffect(() => {
-			const textarea = textareaRef.current;
+	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setInput(event.target.value);
+	};
 
-			if (textarea) {
-				textarea.style.height = "auto";
+	const send = ({ text }) => {
+		// 检测是否登录，如果没有登录直接跳转登录页面/login
+		if (!user) {
+			window.location.href = "/login";
+			return null;
+		}
 
-				const scrollHeight = textarea.scrollHeight;
+		if (!text) return;
 
-				textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`;
-				textarea.style.overflowY =
-					scrollHeight > TEXTAREA_MAX_HEIGHT ? "auto" : "hidden";
-			}
-		}, [input, textareaRef]);
+		setChatStarted(true);
+		console.log(text, "text in ChatImpl");
+		sendMessage?.({ text });
+	};
 
-		const runAnimation = async () => {
-			if (chatStarted) {
-				return;
-			}
-
-			await Promise.all([
-				animate(
-					"#examples",
-					{ opacity: 0, display: "none" },
-					{ duration: 0.1 },
-				),
-				animate(
-					"#intro",
-					{ opacity: 0, flex: 1 },
-					{ duration: 0.2, ease: cubicEasingFn },
-				),
-			]);
-
-			chatStore.setKey("started", true);
-
-			setChatStarted(true);
-		};
-
-		const sendMessage = async (
-			_event: React.UIEvent,
-			messageInput?: string,
-		) => {
-			// 检测是否登录，如果没有登录直接跳转登录页面/login
-			if (!user) {
-				window.location.href = "/login";
-				return null;
-			}
-
-			const _input = messageInput || input;
-
-			if (_input.length === 0 || isLoading) {
-				return;
-			}
-
-			/**
-			 * @note (delm) Usually saving files shouldn't take long but it may take longer if there
-			 * many unsaved files. In that case we need to block user input and show an indicator
-			 * of some kind so the user is aware that something is happening. But I consider the
-			 * happy case to be no unsaved files and I would expect users to save their changes
-			 * before they send another message.
-			 */
-			await workbenchStore.saveAllFiles();
-
-			const fileModifications = workbenchStore.getFileModifcations();
-
-			chatStore.setKey("aborted", false);
-
-			runAnimation();
-
-			if (fileModifications !== undefined) {
-				const diff = fileModificationsToHTML(fileModifications);
-
-				/**
-				 * If we have file modifications we append a new user message manually since we have to prefix
-				 * the user input with the file modifications and we don't want the new user input to appear
-				 * in the prompt. Using `append` is almost the same as `handleSubmit` except that we have to
-				 * manually reset the input and we'd have to manually pass in file attachments. However, those
-				 * aren't relevant here.
-				 */
-				append({ role: "user", content: `${diff}\n\n${_input}` });
-
-				/**
-				 * After sending a new message we reset all modifications since the model
-				 * should now be aware of all the changes.
-				 */
-				workbenchStore.resetAllFileModifications();
-			} else {
-				append({ role: "user", content: _input });
-			}
-
-			setInput("");
-
-			resetEnhancer();
-
-			textareaRef.current?.blur();
-		};
-
-		const [messageRef, scrollRef] = useSnapScroll();
-
-		return (
-			<BaseChat
-				ref={animationScope}
-				textareaRef={textareaRef}
-				input={input}
-				showChat={showChat}
-				chatStarted={chatStarted}
-				isStreaming={isLoading}
-				enhancingPrompt={enhancingPrompt}
-				promptEnhanced={promptEnhanced}
-				sendMessage={sendMessage}
-				messageRef={messageRef}
-				scrollRef={scrollRef}
-				handleInputChange={handleInputChange}
-				handleStop={abort}
-				messages={messages.map((message, i) => {
-					if (message.role === "user") {
-						return message;
-					}
-
-					return {
-						...message,
-						content: parsedMessages[i] || "",
-					};
-				})}
-				enhancePrompt={() => {
-					enhancePrompt(input, (input) => {
-						setInput(input);
-						scrollTextArea();
-					});
-				}}
-			/>
-		);
-	},
-);
+	return (
+		<BaseChat
+			ref={animationScope}
+			textareaRef={textareaRef}
+			input={input}
+			chatStarted={chatStarted}
+			sendMessage={send}
+			messageRef={messageRef}
+			scrollRef={scrollRef}
+			handleInputChange={handleInputChange}
+			handleStop={abort}
+			messages={messages}
+		/>
+	);
+};

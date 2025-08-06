@@ -1,55 +1,58 @@
-import { type ActionFunctionArgs } from "@remix-run/cloudflare";
-import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from "~/lib/.server/llm/constants";
-import { CONTINUE_PROMPT } from "~/lib/.server/llm/prompts";
+import type { ActionFunctionArgs } from "@remix-run/cloudflare";
+import { createClient } from "~/lib/supabase.server";
 import {
 	streamText,
 	type Messages,
 	type StreamingOptions,
 } from "~/lib/.server/llm/stream-text";
-import SwitchableStream from "~/lib/.server/llm/switchable-stream";
+import { insertTokenUsage } from "~/lib/token-usage.server";
+import { MODEL_NAME } from "~/lib/.server/llm/model";
 
 export async function action({ request, context }: ActionFunctionArgs) {
-	const { messages } = await request.json<{ messages: Messages }>();
-
-	const stream = new SwitchableStream();
+	const { messages } = await request.json<{
+		messages: Messages;
+	}>();
 
 	try {
 		const options: StreamingOptions = {
 			toolChoice: "none",
-			// onFinish: async ({ text: content, finishReason }) => {
-			// 	// 这里的content就是最终的内容
-			// 	if (finishReason !== "length") {
-			// 		return stream.close();
-			// 	}
-
-			// 	if (stream.switches >= MAX_RESPONSE_SEGMENTS) {
-			// 		throw Error("Cannot continue message: Maximum segments reached");
-			// 	}
-
-			// 	const switchesLeft = MAX_RESPONSE_SEGMENTS - stream.switches;
-
-			// 	console.log(
-			// 		`Reached max token limit (${MAX_TOKENS}): Continuing message (${switchesLeft} switches left)`,
-			// 	);
-
-			// 	messages.push({ role: "assistant", content });
-			// 	messages.push({ role: "user", content: CONTINUE_PROMPT });
-
-			// 	const result = await streamText(
-			// 		messages,
-			// 		context.cloudflare.env,
-			// 		options,
-			// 	);
-
-			// 	return stream.switchSource(result.toAIStream());
-			// },
 		};
 
-		const result = streamText(messages, context.cloudflare.env, options);
+		const result = await streamText(messages, context.cloudflare.env, options);
 
-		// console.log(result, "result");
+		// 获取当前用户的认证信息
+		const response = new Response();
+		const supabase = createClient(
+			request,
+			response,
+			context.cloudflare.env.SUPABASE_URL,
+			context.cloudflare.env.SUPABASE_ANON_KEY,
+		);
+		const {
+			data: { session },
+		} = await supabase.auth.getSession();
 
-		// stream.switchSource(result.toAIStream());
+		// 计算token的使用情况
+		result.usage.then(({ inputTokens, outputTokens }) => {
+			if (!inputTokens || !outputTokens) return;
+			const price = (inputTokens * 0.005 + outputTokens * 0.015) / 1000;
+
+			// 只有在用户已登录的情况下才记录 token 使用情况
+			if (session?.user?.id) {
+				insertTokenUsage(
+					{
+						userId: session.user.id,
+						modelName: MODEL_NAME,
+						inputTokens,
+						outputTokens,
+						price,
+					},
+					context.cloudflare.env.SUPABASE_URL,
+					context.cloudflare.env.SUPABASE_ANON_KEY,
+					request,
+				);
+			}
+		});
 
 		return result.toUIMessageStreamResponse();
 	} catch (error) {

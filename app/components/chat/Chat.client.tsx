@@ -6,11 +6,10 @@ import { cssTransition, ToastContainer } from "react-toastify";
 import { useMessageParser, useShortcuts, useSnapScroll } from "~/lib/hooks";
 import { chatStore } from "~/lib/stores/chat";
 import { workbenchStore } from "~/lib/stores/workbench";
-import { cubicEasingFn } from "~/utils/easings";
 import { renderLogger } from "~/utils/logger";
 import { BaseChat } from "./BaseChat";
 import { useLoaderData } from "@remix-run/react";
-import { convertToCoreMessages, DefaultChatTransport } from "ai";
+import { DefaultChatTransport } from "ai";
 
 const toastAnimation = cssTransition({
 	enter: "animated fadeInRight",
@@ -68,14 +67,17 @@ export const ChatImpl = () => {
 	const [chatStarted, setChatStarted] = useState(false);
 	const [animationScope, animate] = useAnimate();
 
-	// TODO: 定位解决messages结构参数不对问题
 	const { messages, stop, sendMessage } = useChat({
 		transport: new DefaultChatTransport({
 			api: "/api/chat",
+			body: {
+				hello: 123,
+			},
 		}),
 	});
 
-	const { parsedMessages, parseMessages } = useMessageParser();
+	console.log(messages, "messages in ChatImpl");
+
 	const [input, setInput] = useState("");
 
 	const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
@@ -116,7 +118,6 @@ export const ChatImpl = () => {
 		if (!text) return;
 
 		setChatStarted(true);
-		console.log(text, "text in ChatImpl");
 		sendMessage?.({ text });
 	};
 

@@ -55,6 +55,7 @@
 		"@remix-run/cloudflare-pages": "^2.10.2",
 		"@remix-run/node": "^2.16.6",
 		"@remix-run/react": "^2.10.2",
+		"@stripe/stripe-js": "^7.8.0",
 		"@supabase/ssr": "^0.6.1",
 		"@supabase/supabase-js": "^2.50.5",
 		"@uiw/codemirror-theme-vscode": "^4.23.0",
@@ -84,6 +85,7 @@
 		"remix-island": "^0.2.0",
 		"remix-utils": "^7.6.0",
 		"shiki": "^1.9.1",
+		"stripe": "^18.4.0",
 		"unist-util-visit": "^5.0.0",
 		"versions": "^13.1.1"
 	},

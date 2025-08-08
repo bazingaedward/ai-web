@@ -70,13 +70,8 @@ export const ChatImpl = () => {
 	const { messages, stop, sendMessage } = useChat({
 		transport: new DefaultChatTransport({
 			api: "/api/chat",
-			body: {
-				hello: 123,
-			},
 		}),
 	});
-
-	console.log(messages, "messages in ChatImpl");
 
 	const [input, setInput] = useState("");
 

@@ -1,4 +1,3 @@
-import { useStore } from "@nanostores/react";
 import type { LinksFunction } from "@remix-run/cloudflare";
 import {
 	Links,
@@ -6,6 +5,7 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
+	useLoaderData,
 } from "@remix-run/react";
 import tailwindReset from "@unocss/reset/tailwind-compat.css?url";
 import { createHead } from "remix-island";
@@ -19,8 +19,18 @@ import "virtual:uno.css";
 export const links: LinksFunction = () => [
 	{
 		rel: "icon",
+		href: "/favicon.ico",
+		type: "image/x-icon",
+	},
+	{
+		rel: "icon",
 		href: "/favicon.png",
-		type: "image/svg+xml",
+		type: "image/png",
+	},
+	{
+		rel: "apple-touch-icon",
+		href: "/favicon.png",
+		sizes: "180x180",
 	},
 	{ rel: "stylesheet", href: reactToastifyStyles },
 	{ rel: "stylesheet", href: tailwindReset },
@@ -45,7 +55,22 @@ export function meta() {
 	return [
 		{
 			name: "build-time",
-			content: __BUILD_TIME__,
+			content: new Date().toISOString(),
+		},
+		{
+			title: "AI Web - Your AI Assistant",
+		},
+		{
+			name: "description",
+			content: "AI-powered web development assistant",
+		},
+		{
+			name: "author",
+			content: "AI Web",
+		},
+		{
+			name: "robots",
+			content: "index,follow",
 		},
 	];
 }

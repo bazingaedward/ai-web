@@ -9,6 +9,9 @@ GOOGLE_CLIENT_ID="734784472277-ike4ja77h9t3khpr1hu1qu8h1b5ssmqg.apps.googleuserc
 GITHUB_CLIENT_ID="Iv23liH2R1uPkNlfkObU"
 SUPABASE_URL="https://avjfdfudvssfmhdoiqri.supabase.co"
 SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2amZkZnVkdnNzZm1oZG9pcXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwMzA1MzQsImV4cCI6MjA2NzYwNjUzNH0.VC5L6JSlRGGH5RK-rjU9snO-du3onCFjaVqvacyYLhM"
+STRIPE_PUBLISHABLE_KEY="pk_test_your_publishable_key_here"
+STRIPE_SECRET_KEY="sk_test_your_secret_key_here"
+STRIPE_WEBHOOK_SECRET="whsec_your_webhook_secret_here"
 
 
 [[kv_namespaces]]

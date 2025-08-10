@@ -40,7 +40,7 @@ const pricingTiers: PricingTier[] = [
 		],
 		buttonText: "Upgrade to Pro",
 		popular: true,
-		priceId: "price_pro_monthly", // Stripe price ID
+		priceId: "price_1RuYwC3xeSvGURRPjgGjrEFg", // Stripe price ID
 	},
 	{
 		name: "Team",

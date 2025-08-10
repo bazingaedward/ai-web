@@ -1,10 +1,13 @@
 import { loadStripe } from "@stripe/stripe-js";
+// import 'dotenv'
 
 let stripePromise: ReturnType<typeof loadStripe>;
 
 export const getStripe = () => {
 	if (!stripePromise) {
-		stripePromise = loadStripe(window.ENV?.STRIPE_PUBLISHABLE_KEY || "");
+		stripePromise = loadStripe(
+			"pk_test_51Ru6i23xeSvGURRPuoD9Zaxjozz0onc0NXVHLhVJSPblwbsESi3EQWQ3jMrs5QDTA15Te8KmGccDhb9SPvrlEDUl00rUeV2EtS",
+		);
 	}
 	return stripePromise;
 };

@@ -96,7 +96,7 @@ export const PricingModal = memo(
 		return (
 			<DialogRoot open={isOpen}>
 				<Dialog onBackdrop={onClose} onClose={onClose} className="w-[800px]">
-					<div className="w-[800px]">
+					<div className="w-[800px] overflow-y-auto">
 						<div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor">
 							<DialogTitle className="!p-0 !border-none text-2xl font-bold">
 								Choose Your Plan
@@ -108,7 +108,7 @@ export const PricingModal = memo(
 							any time.
 						</DialogDescription>
 
-						<div className="px-6 pb-6">
+						<div className="px-6 pb-6 h-100 overflow-y-auto">
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 								{pricingTiers.map((tier) => (
 									<div

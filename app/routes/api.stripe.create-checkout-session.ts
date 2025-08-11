@@ -42,13 +42,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		}
 
 		// Create checkout session
-		const checkoutSession = await createCheckoutSession({
-			customerId: customer.id,
-			customerEmail: userEmail,
-			priceId,
-			successUrl: `${new URL(request.url).origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-			cancelUrl: `${new URL(request.url).origin}/payment/canceled`,
-		});
+		const checkoutSession = await createCheckoutSession(
+			{
+				customerId: customer.id,
+				customerEmail: userEmail,
+				priceId,
+				successUrl: `${new URL(request.url).origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+				cancelUrl: `${new URL(request.url).origin}/payment/canceled`,
+			},
+			context.cloudflare.env,
+		);
 
 		return json({ sessionId: checkoutSession.id });
 	} catch (error) {

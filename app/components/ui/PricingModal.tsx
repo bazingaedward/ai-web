@@ -1,6 +1,5 @@
 import { memo, useState } from "react";
 import { Dialog, DialogTitle, DialogDescription, DialogRoot } from "./Dialog";
-import { IconButton } from "./IconButton";
 import { classNames } from "~/utils/classNames";
 
 interface PricingTier {
@@ -97,7 +96,7 @@ export const PricingModal = memo(
 		return (
 			<DialogRoot open={isOpen}>
 				<Dialog onBackdrop={onClose} onClose={onClose} className="w-[800px]">
-					<div className="max-h-[90vh] overflow-y-auto w-full">
+					<div className="w-[800px]">
 						<div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor">
 							<DialogTitle className="!p-0 !border-none text-2xl font-bold">
 								Choose Your Plan

@@ -1,9 +1,8 @@
-import { useStore } from "@nanostores/react";
 import { useChat } from "@ai-sdk/react";
 import { useAnimate } from "framer-motion";
-import { memo, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cssTransition, ToastContainer } from "react-toastify";
-import { useMessageParser, useShortcuts, useSnapScroll } from "~/lib/hooks";
+import { useShortcuts, useSnapScroll } from "~/lib/hooks";
 import { chatStore } from "~/lib/stores/chat";
 import { workbenchStore } from "~/lib/stores/workbench";
 import { renderLogger } from "~/utils/logger";

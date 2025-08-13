@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 
 // Stripe 单例缓存，基于 env 对象
-const stripeCache = new WeakMap<object, Stripe>();
+const stripeCache = new WeakMap();
 
 export function getStripe(env: object): Stripe {
 	if (!env) throw new Error("env is required for Stripe initialization");
@@ -10,6 +10,7 @@ export function getStripe(env: object): Stripe {
 		// 默认去env的STRIPE_SECRET_KEY，没有则去process.env
 		const secretKey =
 			(env as any).STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
+		console.log(secretKey, "sssss");
 		if (!secretKey) throw new Error("STRIPE_SECRET_KEY is missing");
 		stripe = new Stripe(secretKey, {
 			apiVersion: "2025-07-30.basil",

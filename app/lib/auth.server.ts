@@ -7,13 +7,12 @@ import { createClient } from "~/lib/supabase.server";
  * @param args
  * @returns
  */
-export async function requireAuth(args: LoaderFunctionArgs) {
-	const { request } = args;
+export async function requireAuth({ request, context }: LoaderFunctionArgs) {
 	const response = new Response();
 
 	// 从环境变量获取 Supabase 配置
-	const supabaseUrl = args.context.cloudflare.env.SUPABASE_URL;
-	const supabaseAnonKey = args.context.cloudflare.env.SUPABASE_ANON_KEY;
+	const supabaseUrl = context.cloudflare.env.SUPABASE_URL;
+	const supabaseAnonKey = context.cloudflare.env.SUPABASE_ANON_KEY;
 
 	if (!supabaseUrl || !supabaseAnonKey) {
 		throw new Error("Supabase credentials not configured");

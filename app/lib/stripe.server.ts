@@ -10,7 +10,6 @@ export function getStripe(env: object): Stripe {
 		// 默认去env的STRIPE_SECRET_KEY，没有则去process.env
 		const secretKey =
 			(env as any).STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
-		console.log(secretKey, "sssss");
 		if (!secretKey) throw new Error("STRIPE_SECRET_KEY is missing");
 		stripe = new Stripe(secretKey, {
 			apiVersion: "2025-07-30.basil",
@@ -126,5 +125,10 @@ export async function constructWebhookEvent(
 	env: object = process.env,
 ) {
 	const stripe = getStripe(env);
-	return stripe.webhooks.constructEvent(payload, signature, endpointSecret);
+
+	return stripe.webhooks.constructEventAsync(
+		payload,
+		signature,
+		endpointSecret,
+	);
 }

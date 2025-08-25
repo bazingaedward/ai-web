@@ -33,7 +33,6 @@ export async function redirectToCheckout(data: SubscriptionData) {
 		const responseData = (await response.json()) as { sessionId: string };
 		const { sessionId } = responseData;
 		const stripe = await getStripe();
-		console.log("Stripe loaded:", stripe);
 
 		if (!stripe) {
 			throw new Error("Stripe failed to load");

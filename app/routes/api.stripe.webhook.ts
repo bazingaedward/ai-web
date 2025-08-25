@@ -53,7 +53,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		} catch (err) {
 			console.log(err, "err");
 			return json(
-				{ error: `Webhook signature verification failed: ${endpointSecret}` },
+				{
+					error: `Webhook signature verification failed: ${endpointSecret}`,
+					err,
+					payload,
+					signature,
+				},
 				{ status: 500 },
 			);
 		}

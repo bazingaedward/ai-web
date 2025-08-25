@@ -122,7 +122,7 @@ export async function constructWebhookEvent(
 	payload: string | Buffer,
 	signature: string,
 	endpointSecret: string,
-	env: object = process.env,
+	env: object,
 ) {
 	const stripe = getStripe(env);
 

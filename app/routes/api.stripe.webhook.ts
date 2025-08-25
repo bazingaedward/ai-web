@@ -26,6 +26,7 @@ function createWebhookSupabaseClient(context: ActionFunctionArgs["context"]) {
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
+	const env = context?.cloudflare?.env as Record<string, unknown>;
 	if (request.method !== "POST") {
 		return json({ error: "Method not allowed" }, { status: 405 });
 	}
@@ -38,8 +39,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		}
 
 		const payload = await request.text();
-		const endpointSecret = (context.cloudflare.env as Record<string, unknown>)
-			.STRIPE_WEBHOOK_SECRET as string;
+		const endpointSecret = env.STRIPE_WEBHOOK_SECRET as string;
 
 		// const endpointSecret =
 		// 	"whsec_bbf58ed1005f40defa7ea0390c1e73a8f869a3d7883711a3fdf1ee853842e720";
@@ -49,7 +49,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		}
 		let event: Stripe.Event;
 		try {
-			event = await constructWebhookEvent(payload, signature, endpointSecret);
+			event = await constructWebhookEvent(
+				payload,
+				signature,
+				endpointSecret,
+				env,
+			);
 		} catch (err) {
 			return json(
 				{

@@ -2,12 +2,10 @@ import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { redirect } from "@remix-run/cloudflare";
 import { createClient } from "~/lib/supabase.server";
 
-/**
- * chat id usage
- * @param args
- * @returns
- */
-export async function requireAuth({ request, context }: LoaderFunctionArgs) {
+export async function getSupabaseClient(
+	request: Request,
+	context: LoaderFunctionArgs["context"],
+) {
 	const response = new Response();
 
 	// 从环境变量获取 Supabase 配置
@@ -24,6 +22,15 @@ export async function requireAuth({ request, context }: LoaderFunctionArgs) {
 		supabaseUrl,
 		supabaseAnonKey,
 	);
+	return { supabase, response };
+}
+/**
+ * chat id usage
+ * @param args
+ * @returns
+ */
+export async function requireAuth({ request, context }: LoaderFunctionArgs) {
+	const { supabase, response } = await getSupabaseClient(request, context);
 
 	const {
 		data: { session },

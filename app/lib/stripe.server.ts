@@ -9,7 +9,8 @@ export function getStripe(env: object): Stripe {
 	if (!stripe) {
 		// 默认去env的STRIPE_SECRET_KEY，没有则去process.env
 		const secretKey =
-			(env as any).STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
+			(env as Record<string, string>).STRIPE_SECRET_KEY ||
+			process.env.STRIPE_SECRET_KEY;
 		if (!secretKey) throw new Error("STRIPE_SECRET_KEY is missing");
 		stripe = new Stripe(secretKey, {
 			apiVersion: "2025-07-30.basil",
@@ -25,6 +26,7 @@ export interface CreateSubscriptionParams {
 	priceId: string;
 	successUrl: string;
 	cancelUrl: string;
+	userId: string;
 }
 
 export async function createCheckoutSession(
@@ -34,6 +36,7 @@ export async function createCheckoutSession(
 		priceId,
 		successUrl,
 		cancelUrl,
+		userId,
 	}: CreateSubscriptionParams,
 	env: object = process.env,
 ) {
@@ -52,6 +55,7 @@ export async function createCheckoutSession(
 		billing_address_collection: "auto",
 		metadata: {
 			priceId,
+			userId,
 		},
 	};
 

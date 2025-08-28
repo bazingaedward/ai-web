@@ -2,54 +2,26 @@ import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
 import { useState } from "react";
 import { getOptionalAuth } from "~/lib/auth.server";
-import {
-	getCustomerByEmail,
-	getCustomerSubscriptions,
-} from "~/lib/stripe.server";
 import { PricingModal } from "~/components/ui/PricingModal";
 import { redirectToCheckout } from "~/lib/stripe.client";
+import { getUserSubscriptionById } from "~/lib/supabase.server";
 
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
-	const { session } = await getOptionalAuth({ request, context, params });
+	const { session, supabase } = await getOptionalAuth({
+		request,
+		context,
+		params,
+	});
 
 	if (!session?.user) {
 		throw new Response("Unauthorized", { status: 401 });
 	}
 
-	let subscriptionInfo = null;
-
-	if (!session.user.email) {
-		throw new Response("User email is required", { status: 400 });
-	}
-
-	try {
-		const customer = await getCustomerByEmail(session.user.email);
-		if (customer) {
-			const subscriptions = await getCustomerSubscriptions(customer.id);
-			if (subscriptions.data.length > 0) {
-				const subscription = subscriptions.data[0] as unknown as Record<
-					string,
-					unknown
-				>;
-				const items = subscription.items as Record<string, unknown>;
-				const dataArray = items?.data as Array<Record<string, unknown>>;
-				const firstItem = dataArray?.[0];
-				const price = firstItem?.price as Record<string, unknown>;
-
-				subscriptionInfo = {
-					id: subscription.id as string,
-					status: subscription.status as string,
-					currentPeriodEnd: new Date(
-						(subscription.current_period_end as number) * 1000,
-					),
-					cancelAtPeriodEnd: subscription.cancel_at_period_end as boolean,
-					plan: (price?.lookup_key as string) || "unknown",
-				};
-			}
-		}
-	} catch (error: unknown) {
-		console.error("Error fetching subscription:", error);
-	}
+	// 使用supabse获取用户订阅信息，查询user_subscription表
+	const subscriptionInfo = await getUserSubscriptionById(
+		supabase,
+		session.user.id,
+	);
 
 	return json({
 		user: session.user,
@@ -127,9 +99,7 @@ export default function Account() {
 									<div className="flex items-center justify-between">
 										<div>
 											<p className="text-bolt-elements-textPrimary font-medium">
-												Current Plan:{" "}
-												{subscription.plan.charAt(0).toUpperCase() +
-													subscription.plan.slice(1)}
+												Current Plan: {subscription.plan}
 											</p>
 											<p className="text-bolt-elements-textSecondary text-sm">
 												Status: {subscription.status}

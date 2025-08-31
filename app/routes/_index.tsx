@@ -4,12 +4,20 @@ import { BaseChat } from "~/components/chat/BaseChat";
 import { Chat } from "~/components/chat/Chat.client";
 import { Header } from "~/components/header/Header";
 import { getOptionalAuth } from "~/lib/auth.server";
+import { getUserSubscriptionById } from "~/lib/supabase.server";
 
 export async function loader(args: LoaderFunctionArgs) {
-	const { session } = await getOptionalAuth(args);
+	const { session, supabase } = await getOptionalAuth(args);
+
+	// 使用supabse获取用户订阅信息，查询user_subscription表
+	let subscriptionInfo = null;
+	if (session?.user) {
+		subscriptionInfo = await getUserSubscriptionById(supabase, session.user.id);
+	}
 
 	return json({
 		user: session?.user || null,
+		subscriptionInfo,
 	});
 }
 

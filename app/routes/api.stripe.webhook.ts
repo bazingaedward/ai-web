@@ -1,7 +1,21 @@
-import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
+import { json, type ActionFunctionArgs } from "@remix-run/node";
+import type Stripe from "stripe";
 import { constructWebhookEvent } from "~/lib/stripe.server";
+import {
+	handleCheckoutSessionCompleted,
+	handleInvoicePaymentSucceeded,
+	handlePaymentIntentSucceeded,
+	handleSubscriptionCreated,
+	handleSubscriptionDeleted,
+	handleSubscriptionUpdated,
+} from "~/lib/.server/stripe/event-handlers";
 
 export async function action({ request, context }: ActionFunctionArgs) {
+	const cloudflareContext = context as unknown as {
+		cloudflare?: { env?: Record<string, unknown> };
+	};
+	const env = cloudflareContext?.cloudflare?.env as Record<string, unknown>;
+
 	if (request.method !== "POST") {
 		return json({ error: "Method not allowed" }, { status: 405 });
 	}
@@ -14,60 +28,59 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		}
 
 		const payload = await request.text();
-		const endpointSecret = (context.env as Record<string, unknown>)
-			.STRIPE_WEBHOOK_SECRET as string;
+
+		// stripe cli test webhook： stripe listen --forward-to localhost:3001/api/stripe/webhook
+		const endpointSecret = (env.STRIPE_WEBHOOK_SECRET ||
+			process.env.STRIPE_CLI_WEBHOOK_SECRET) as string;
 
 		if (!endpointSecret) {
 			return json({ error: "Webhook secret not configured" }, { status: 500 });
 		}
-
-		const event = await constructWebhookEvent(
-			payload,
-			signature,
-			endpointSecret,
-		);
+		let event: Stripe.Event;
+		try {
+			event = await constructWebhookEvent(
+				payload,
+				signature,
+				endpointSecret,
+				env,
+			);
+		} catch (err) {
+			return json(
+				{
+					error: `Webhook signature verification failed: ${endpointSecret}`,
+					err: err?.toString(),
+				},
+				{ status: 500 },
+			);
+		}
 
 		switch (event.type) {
 			case "checkout.session.completed": {
-				const session = event.data.object;
-				console.log("Checkout session completed:", session.id);
-
-				if (session.mode === "subscription" && session.customer) {
-					// Handle subscription creation
-					console.log(
-						"New subscription created for customer:",
-						session.customer,
-					);
-				}
+				// 处理 checkout.session.completed 事件
+				await handleCheckoutSessionCompleted(event, context);
 				break;
 			}
-
-			case "customer.subscription.updated": {
-				const subscription = event.data.object;
-				console.log("Subscription updated:", subscription.id);
-				break;
-			}
-
-			case "customer.subscription.deleted": {
-				const subscription = event.data.object;
-				console.log("Subscription cancelled:", subscription.id);
-				break;
-			}
-
-			case "invoice.payment_succeeded": {
-				const invoice = event.data.object;
-				console.log("Payment succeeded:", invoice.id);
-				break;
-			}
-
-			case "invoice.payment_failed": {
-				const invoice = event.data.object;
-				console.log("Payment failed:", invoice.id);
-				break;
-			}
-
-			default:
-				console.log(`Unhandled event type ${event.type}`);
+			// 表示 支付已成功完成。通常在客户完成付款、资金成功从支付方式扣除后触发。
+			// case "payment_intent.succeeded": {
+			// 	handlePaymentIntentSucceeded(event, context);
+			// 	break;
+			// }
+			// case "invoice.payment_succeeded": {
+			// 	handleInvoicePaymentSucceeded(event, context);
+			// 	break;
+			// }
+			// case "customer.subscription.created": {
+			// 	handleSubscriptionCreated(event, context);
+			// 	break;
+			// }
+			// case "customer.subscription.updated": {
+			// 	handleSubscriptionUpdated(event, context);
+			// 	break;
+			// }
+			// case "customer.subscription.deleted": {
+			// 	handleSubscriptionDeleted(event, context);
+			// 	break;
+			// }
 		}
 
 		return json({ received: true });

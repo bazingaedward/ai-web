@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export function createClient(
 	request: Request,
@@ -54,4 +55,24 @@ function setCookie(
 	if (options.expires) cookie += `; Expires=${options.expires}`;
 
 	response.headers.append("Set-Cookie", cookie);
+}
+
+/**
+ * 获取用户订阅信息
+ * @param supabase
+ * @param userId
+ * @returns
+ */
+export async function getUserSubscriptionById(
+	supabase: SupabaseClient,
+	userId: string,
+) {
+	// 使用supabse获取用户订阅信息，查询user_subscription表
+	const { data: subscriptionInfo } = await supabase
+		.from("user_subscriptions")
+		.select("status,plan")
+		.eq("user_id", userId)
+		.single();
+
+	return subscriptionInfo;
 }

@@ -49,6 +49,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 				priceId,
 				successUrl: `${new URL(request.url).origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
 				cancelUrl: `${new URL(request.url).origin}/payment/canceled`,
+				userId: session.user.id,
 			},
 			context.cloudflare.env,
 		);

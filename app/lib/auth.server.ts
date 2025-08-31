@@ -2,18 +2,15 @@ import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { redirect } from "@remix-run/cloudflare";
 import { createClient } from "~/lib/supabase.server";
 
-/**
- * chat id usage
- * @param args
- * @returns
- */
-export async function requireAuth(args: LoaderFunctionArgs) {
-	const { request } = args;
+export async function getSupabaseClient(
+	request: Request,
+	context: LoaderFunctionArgs["context"],
+) {
 	const response = new Response();
 
 	// 从环境变量获取 Supabase 配置
-	const supabaseUrl = args.context.cloudflare.env.SUPABASE_URL;
-	const supabaseAnonKey = args.context.cloudflare.env.SUPABASE_ANON_KEY;
+	const supabaseUrl = context.cloudflare.env.SUPABASE_URL;
+	const supabaseAnonKey = context.cloudflare.env.SUPABASE_ANON_KEY;
 
 	if (!supabaseUrl || !supabaseAnonKey) {
 		throw new Error("Supabase credentials not configured");
@@ -25,6 +22,15 @@ export async function requireAuth(args: LoaderFunctionArgs) {
 		supabaseUrl,
 		supabaseAnonKey,
 	);
+	return { supabase, response };
+}
+/**
+ * chat id usage
+ * @param args
+ * @returns
+ */
+export async function requireAuth({ request, context }: LoaderFunctionArgs) {
+	const { supabase, response } = await getSupabaseClient(request, context);
 
 	const {
 		data: { session },

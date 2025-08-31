@@ -26,12 +26,16 @@ type LoaderData = {
 			picture?: string;
 		};
 	} | null;
+	subscriptionInfo: {
+		status: string;
+		plan: string;
+	} | null;
 };
 
 export function Header() {
 	const chat = useStore(chatStore);
 	const navigate = useNavigate();
-	const { user } = useLoaderData<LoaderData>();
+	const { user, subscriptionInfo } = useLoaderData<LoaderData>();
 	const [isPricingOpen, setIsPricingOpen] = useState(false);
 
 	// 从 Supabase user 对象构造 userInfo
@@ -108,6 +112,27 @@ export function Header() {
 							<span className="text-white text-sm font-medium">
 								{userInfo.name}
 							</span>
+							{/* 订阅计划标签 */}
+							{subscriptionInfo && (
+								<div className="flex items-center">
+									<span
+										className={`px-2 py-1 text-xs font-medium rounded-full ${
+											subscriptionInfo.plan === "pro"
+												? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+												: subscriptionInfo.plan === "premium"
+													? "bg-gradient-to-r from-amber-400 to-orange-500 text-white"
+													: "bg-blue-500 text-white"
+										}`}
+									>
+										{subscriptionInfo.plan === "pro"
+											? "PRO"
+											: subscriptionInfo.plan === "premium"
+												? "PREMIUM"
+												: subscriptionInfo.plan.toUpperCase()}
+									</span>
+								</div>
+							)}
+							{/* 这里加个标签，如果有订阅信息，显示plan对应的标签 */}
 							<button
 								type="button"
 								onClick={() => navigate("/logout")}

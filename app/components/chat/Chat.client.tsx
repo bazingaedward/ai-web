@@ -1,14 +1,14 @@
 import { useChat } from "@ai-sdk/react";
-import { useAnimate } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { cssTransition, ToastContainer } from "react-toastify";
 import { useShortcuts, useSnapScroll } from "~/lib/hooks";
-import { chatStore } from "~/lib/stores/chat";
-import { workbenchStore } from "~/lib/stores/workbench";
+import { $chatStore, updateChatStore } from "~/lib/stores/chat";
 import { renderLogger } from "~/utils/logger";
 import { BaseChat } from "./BaseChat";
 import { useLoaderData } from "@remix-run/react";
 import { DefaultChatTransport } from "ai";
+import { useStore } from "@nanostores/react";
+import { workbenchStore } from "~/lib/stores/workbench";
 
 const toastAnimation = cssTransition({
 	enter: "animated fadeInRight",
@@ -56,15 +56,12 @@ export function Chat() {
 	);
 }
 
-/**
- * Chat component that handles the chat functionality, including sending messages,
- */
 export const ChatImpl = () => {
 	useShortcuts();
 	const { user } = useLoaderData();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
-	const [chatStarted, setChatStarted] = useState(false);
-	const [animationScope, animate] = useAnimate();
+	const chat = useStore($chatStore);
+	const [messageRef, scrollRef] = useSnapScroll();
 
 	const { messages, stop, sendMessage } = useChat({
 		transport: new DefaultChatTransport({
@@ -72,15 +69,7 @@ export const ChatImpl = () => {
 		}),
 	});
 
-	const [input, setInput] = useState("");
-
-	const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
-
-	const abort = () => {
-		stop();
-		chatStore.setKey("aborted", true);
-		workbenchStore.abortAllActions();
-	};
+	const TEXTAREA_MAX_HEIGHT = chat.started ? 400 : 200;
 
 	useEffect(() => {
 		const textarea = textareaRef.current;
@@ -96,12 +85,6 @@ export const ChatImpl = () => {
 		}
 	}, [textareaRef]);
 
-	const [messageRef, scrollRef] = useSnapScroll();
-
-	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setInput(event.target.value);
-	};
-
 	const send = ({ text }) => {
 		// 检测是否登录，如果没有登录直接跳转登录页面/login
 		if (!user) {
@@ -111,22 +94,30 @@ export const ChatImpl = () => {
 
 		if (!text) return;
 
-		setChatStarted(true);
 		sendMessage?.({ text });
+		updateChatStore({
+			started: true,
+			input: "",
+		});
+	};
+
+	const handleStop = () => {
+		stop();
+		updateChatStore({
+			aborted: true,
+			input: "",
+		});
+		workbenchStore.abortAllActions();
 	};
 
 	return (
 		<BaseChat
-			ref={animationScope}
 			textareaRef={textareaRef}
-			input={input}
-			chatStarted={chatStarted}
 			sendMessage={send}
 			messageRef={messageRef}
 			scrollRef={scrollRef}
-			handleInputChange={handleInputChange}
-			handleStop={abort}
 			messages={messages}
+			handleStop={handleStop}
 		/>
 	);
 };

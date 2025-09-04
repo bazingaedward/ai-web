@@ -1,6 +1,6 @@
 import { useStore } from "@nanostores/react";
 import { ClientOnly } from "remix-utils/client-only";
-import { chatStore } from "~/lib/stores/chat";
+import { $chatStore } from "~/lib/stores/chat";
 import { classNames } from "~/utils/classNames";
 import { HeaderActionButtons } from "./HeaderActionButtons.client";
 import { useLoaderData, useNavigate } from "@remix-run/react";
@@ -33,7 +33,7 @@ type LoaderData = {
 };
 
 export function Header() {
-	const chat = useStore(chatStore);
+	const chat = useStore($chatStore);
 	const navigate = useNavigate();
 	const { user, subscriptionInfo } = useLoaderData<LoaderData>();
 	const [isPricingOpen, setIsPricingOpen] = useState(false);

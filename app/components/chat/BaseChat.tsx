@@ -6,23 +6,23 @@ import { Workbench } from "~/components/workbench/Workbench.client";
 import { classNames } from "~/utils/classNames";
 import { Messages } from "./Messages.client";
 import { SendButton } from "./SendButton.client";
+import { ChatTextarea } from "./ChatTextarea";
 
 import styles from "./BaseChat.module.scss";
+import { $chatStore, updateChatStore } from "~/lib/stores/chat";
+import { useStore } from "@nanostores/react";
 
 interface BaseChatProps {
 	textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined;
 	messageRef?: RefCallback<HTMLDivElement> | undefined;
 	scrollRef?: RefCallback<HTMLDivElement> | undefined;
 	showChat?: boolean;
-	chatStarted?: boolean;
 	isStreaming?: boolean;
 	messages?: CoreMessage[];
 	enhancingPrompt?: boolean;
 	promptEnhanced?: boolean;
-	input?: string;
 	handleStop?: () => void;
-	sendMessage?: (event: React.UIEvent, messageInput?: string) => void;
-	handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+	sendMessage?: (message: { text: string }) => void;
 	enhancePrompt?: () => void;
 }
 
@@ -34,20 +34,28 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 			textareaRef,
 			messageRef,
 			scrollRef,
-			chatStarted = false,
 			isStreaming = false,
 			messages,
-			input = "",
 			sendMessage,
-			handleInputChange,
 			handleStop,
 		},
 		ref,
 	) => {
+		const chat = useStore($chatStore);
+		const chatStarted = chat.started;
+		const input = chat.input;
 		const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
 		const send = () => {
 			sendMessage?.({ text: input });
+		};
+
+		const handleInputChange = (
+			event: React.ChangeEvent<HTMLTextAreaElement>,
+		) => {
+			updateChatStore({
+				input: event.target.value,
+			});
 		};
 
 		return (
@@ -110,41 +118,30 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 										"shadow-sm border border-bolt-elements-borderColor bg-bolt-elements-prompt-background backdrop-filter backdrop-blur-[8px] rounded-lg overflow-hidden",
 									)}
 								>
-									<textarea
-										ref={textareaRef}
-										className={
-											"w-full pl-4 pt-4 pr-16 focus:outline-none resize-none text-md text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent"
-										}
-										onKeyDown={(event) => {
-											if (event.key === "Enter") {
-												if (event.shiftKey) return;
-												send();
-											}
-										}}
-										value={input}
-										onChange={(event) => {
-											handleInputChange?.(event);
-										}}
-										style={{
-											minHeight: TEXTAREA_MIN_HEIGHT,
-											maxHeight: TEXTAREA_MAX_HEIGHT,
-										}}
-										placeholder="How can Sharkbook help you today?"
-										translate="no"
-									/>
 									<ClientOnly>
 										{() => (
-											<SendButton
-												show={input.length > 0 || isStreaming}
-												isStreaming={isStreaming}
-												onClick={() => {
-													if (isStreaming) {
-														handleStop?.();
-														return;
-													}
-													send();
-												}}
-											/>
+											<>
+												<ChatTextarea
+													textareaRef={textareaRef}
+													input={input}
+													onInputChange={handleInputChange}
+													onSend={send}
+													minHeight={TEXTAREA_MIN_HEIGHT}
+													maxHeight={TEXTAREA_MAX_HEIGHT}
+												/>
+
+												<SendButton
+													show={input.length > 0 || isStreaming}
+													isStreaming={isStreaming}
+													onClick={() => {
+														if (isStreaming) {
+															handleStop?.();
+															return;
+														}
+														send();
+													}}
+												/>
+											</>
 										)}
 									</ClientOnly>
 									<div className="flex justify-between text-sm p-4 pt-2">
